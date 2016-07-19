@@ -1,7 +1,7 @@
-Original Message : Hello World
+Original Message : It starts to calculate if text changes i was writing 100-200 line code to calculate row of numbers it but is it possible to calculate a string of numbers like "10+1-2*4" in single command?
 
 
-Encrypted Code : ???'????	P ???G
+Encrypted Code : "??I?!S?`??;?gn??;?BM?'p???9?W???b??/??y*?h?????}??????*;???|??V?a?
 
 
-Decrypted Code : Hello World
+Decrypted Code : It starts to calculate if text changes i was writing 100-200 line code to calculate row of numbers it but is it possible to calculate a string of numbers like "10+1-2*4" in single command?
