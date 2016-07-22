@@ -6,6 +6,7 @@
 #include "Form2.h"
 #include "udp.h"
 int value=0;
+int value1 = 0;
 
 
 #define RECEIVE_IP          "127.0.0.1"
@@ -100,8 +101,8 @@ namespace Crypto {
 			   }
 		}
 
-	/*  Decryption using DES Algortihm  */ 
-	array<Byte>^ DecryptTextFromMemory( array<Byte>^Data, array<Byte>^Key, array<Byte>^IV )
+	/* Decryption using DES Algortihm */
+	array<Byte> ^DecryptTextFromMemory( array<Byte>^ Data, array<Byte>^ Key, array<Byte>^ IV )
 	{
 		try
 			{
@@ -109,7 +110,7 @@ namespace Crypto {
 				 MemoryStream^ msDecrypt = gcnew MemoryStream( Data );
 				 //Creating a new instance of CryptoStream Memory.
 				 CryptoStream^ csDecrypt = gcnew CryptoStream( msDecrypt,(gcnew DESCryptoServiceProvider)->CreateDecryptor( Key, IV ),CryptoStreamMode::Read );
-				 array<Byte>^fromEncrypt = gcnew array<Byte>(Data->Length);
+				 array<Byte> ^fromEncrypt = gcnew array<Byte>(Data->Length);
 
 				 csDecrypt->Read( fromEncrypt, 0, fromEncrypt->Length );
 				 return fromEncrypt;
@@ -119,8 +120,14 @@ namespace Crypto {
 				 Console::WriteLine( "A Cryptographic error occurred: {0}", e->Message );
 				 return nullptr;
 			}
-	}
+	} 
 
+	/* Hashing Function using SHA-256 .NET */
+	int DisplayHashCode( String^ Operand )
+	{
+		int HashCode = Operand->GetHashCode();
+		return HashCode;
+	}
 
 	public ref class Form1 : public System::Windows::Forms::Form
 	{
@@ -135,10 +142,13 @@ namespace Crypto {
 		array<Byte>^ plainkey;
 		array<Byte>^ data;
 		array<Byte>^ cdata;
+		String^ sign;
 		array<Byte>^ rbytes;
 		array<Byte>^ descipher;
 		array<Byte>^ signcipher;
+		array<Byte> ^cipherbytes2;
 		SymmetricAlgorithm^ desObj;
+		SymmetricAlgorithm^ desObj1;
 		RSACryptoServiceProvider^ rsaObj;
 
 	private: System::Windows::Forms::TextBox^  textBox3;
@@ -149,29 +159,21 @@ namespace Crypto {
 	private: Microsoft::VisualBasic::PowerPacks::ShapeContainer^  shapeContainer1;
 	private: Microsoft::VisualBasic::PowerPacks::LineShape^  lineShape2;
 	private: Microsoft::VisualBasic::PowerPacks::LineShape^  lineShape1;
-
-
-
-
+	private: System::Windows::Forms::MenuStrip^  menuStrip1;
+	private: System::Windows::Forms::ToolStripMenuItem^  quitToolStripMenuItem;
 
 
 	private: System::Windows::Forms::PictureBox^  pictureBox1;
 	
-	public: 
-
-		
-
 	public:
 		Form1(void)
 		{
 			InitializeComponent();
 			// Intialization of AES Algorithm Object.
 			desObj = Rijndael::Create();
+			desObj1 = Rijndael::Create();
 
 		}
-
-	
-
 
 	protected:
 		~Form1()
@@ -203,7 +205,7 @@ namespace Crypto {
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
-		/// Required method for Designer support - do not modify
+		/// Required method for Designer support - do not modify  COMPLETE DESIGNER TOOLS AND CODE
 		/// the contents of this method with the code editor.
 		/// </summary>
 		void InitializeComponent(void)
@@ -227,15 +229,18 @@ namespace Crypto {
 			this->shapeContainer1 = (gcnew Microsoft::VisualBasic::PowerPacks::ShapeContainer());
 			this->lineShape2 = (gcnew Microsoft::VisualBasic::PowerPacks::LineShape());
 			this->lineShape1 = (gcnew Microsoft::VisualBasic::PowerPacks::LineShape());
+			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
+			this->quitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->groupBox1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->BeginInit();
+			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button1
 			// 
 			this->button1->Font = (gcnew System::Drawing::Font(L"Georgia", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->button1->Location = System::Drawing::Point(103, 478);
+			this->button1->Location = System::Drawing::Point(103, 492);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(154, 58);
 			this->button1->TabIndex = 0;
@@ -245,9 +250,10 @@ namespace Crypto {
 			// 
 			// button2
 			// 
+			this->button2->Enabled = false;
 			this->button2->Font = (gcnew System::Drawing::Font(L"Georgia", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->button2->Location = System::Drawing::Point(580, 478);
+			this->button2->Location = System::Drawing::Point(580, 492);
 			this->button2->Name = L"button2";
 			this->button2->Size = System::Drawing::Size(152, 58);
 			this->button2->TabIndex = 1;
@@ -260,19 +266,18 @@ namespace Crypto {
 			this->textBox1->BackColor = System::Drawing::SystemColors::Window;
 			this->textBox1->Font = (gcnew System::Drawing::Font(L"Georgia", 11.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->textBox1->Location = System::Drawing::Point(217, 39);
+			this->textBox1->Location = System::Drawing::Point(217, 53);
 			this->textBox1->Multiline = true;
 			this->textBox1->Name = L"textBox1";
 			this->textBox1->Size = System::Drawing::Size(557, 59);
 			this->textBox1->TabIndex = 2;
-			this->textBox1->TextChanged += gcnew System::EventHandler(this, &Form1::textBox1_TextChanged);
 			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Georgia", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label1->Location = System::Drawing::Point(28, 58);
+			this->label1->Location = System::Drawing::Point(28, 72);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(127, 16);
 			this->label1->TabIndex = 3;
@@ -285,7 +290,7 @@ namespace Crypto {
 			this->groupBox1->Controls->Add(this->radioButton1);
 			this->groupBox1->Font = (gcnew System::Drawing::Font(L"Georgia", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->groupBox1->Location = System::Drawing::Point(317, 118);
+			this->groupBox1->Location = System::Drawing::Point(317, 132);
 			this->groupBox1->Name = L"groupBox1";
 			this->groupBox1->Size = System::Drawing::Size(383, 145);
 			this->groupBox1->TabIndex = 4;
@@ -295,7 +300,7 @@ namespace Crypto {
 			// radioButton3
 			// 
 			this->radioButton3->AutoSize = true;
-			this->radioButton3->Location = System::Drawing::Point(33, 100);
+			this->radioButton3->Location = System::Drawing::Point(33, 114);
 			this->radioButton3->Name = L"radioButton3";
 			this->radioButton3->Size = System::Drawing::Size(285, 19);
 			this->radioButton3->TabIndex = 6;
@@ -307,7 +312,7 @@ namespace Crypto {
 			// radioButton2
 			// 
 			this->radioButton2->AutoSize = true;
-			this->radioButton2->Location = System::Drawing::Point(33, 67);
+			this->radioButton2->Location = System::Drawing::Point(33, 81);
 			this->radioButton2->Name = L"radioButton2";
 			this->radioButton2->Size = System::Drawing::Size(216, 19);
 			this->radioButton2->TabIndex = 5;
@@ -319,7 +324,7 @@ namespace Crypto {
 			// radioButton1
 			// 
 			this->radioButton1->AutoSize = true;
-			this->radioButton1->Location = System::Drawing::Point(33, 33);
+			this->radioButton1->Location = System::Drawing::Point(33, 47);
 			this->radioButton1->Name = L"radioButton1";
 			this->radioButton1->Size = System::Drawing::Size(246, 19);
 			this->radioButton1->TabIndex = 0;
@@ -332,7 +337,7 @@ namespace Crypto {
 			// 
 			this->textBox2->Font = (gcnew System::Drawing::Font(L"Georgia", 11.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->textBox2->Location = System::Drawing::Point(217, 379);
+			this->textBox2->Location = System::Drawing::Point(217, 393);
 			this->textBox2->Multiline = true;
 			this->textBox2->Name = L"textBox2";
 			this->textBox2->Size = System::Drawing::Size(557, 59);
@@ -343,7 +348,7 @@ namespace Crypto {
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"Georgia", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label2->Location = System::Drawing::Point(20, 401);
+			this->label2->Location = System::Drawing::Point(20, 415);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(135, 16);
 			this->label2->TabIndex = 6;
@@ -352,7 +357,7 @@ namespace Crypto {
 			// pictureBox1
 			// 
 			this->pictureBox1->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"pictureBox1.Image")));
-			this->pictureBox1->Location = System::Drawing::Point(27, 159);
+			this->pictureBox1->Location = System::Drawing::Point(27, 173);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(128, 130);
 			this->pictureBox1->TabIndex = 7;
@@ -360,7 +365,7 @@ namespace Crypto {
 			// 
 			// textBox3
 			// 
-			this->textBox3->Location = System::Drawing::Point(217, 306);
+			this->textBox3->Location = System::Drawing::Point(217, 320);
 			this->textBox3->Multiline = true;
 			this->textBox3->Name = L"textBox3";
 			this->textBox3->Size = System::Drawing::Size(136, 47);
@@ -368,7 +373,7 @@ namespace Crypto {
 			// 
 			// textBox4
 			// 
-			this->textBox4->Location = System::Drawing::Point(638, 305);
+			this->textBox4->Location = System::Drawing::Point(638, 319);
 			this->textBox4->Multiline = true;
 			this->textBox4->Name = L"textBox4";
 			this->textBox4->Size = System::Drawing::Size(136, 47);
@@ -377,7 +382,7 @@ namespace Crypto {
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(247, 282);
+			this->label3->Location = System::Drawing::Point(247, 296);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(72, 14);
 			this->label3->TabIndex = 10;
@@ -385,7 +390,7 @@ namespace Crypto {
 			// 
 			// button3
 			// 
-			this->button3->Location = System::Drawing::Point(456, 305);
+			this->button3->Location = System::Drawing::Point(456, 319);
 			this->button3->Name = L"button3";
 			this->button3->Size = System::Drawing::Size(75, 47);
 			this->button3->TabIndex = 11;
@@ -400,7 +405,7 @@ namespace Crypto {
 			this->shapeContainer1->Name = L"shapeContainer1";
 			this->shapeContainer1->Shapes->AddRange(gcnew cli::array< Microsoft::VisualBasic::PowerPacks::Shape^  >(2) {this->lineShape2, 
 				this->lineShape1});
-			this->shapeContainer1->Size = System::Drawing::Size(840, 554);
+			this->shapeContainer1->Size = System::Drawing::Size(840, 568);
 			this->shapeContainer1->TabIndex = 12;
 			this->shapeContainer1->TabStop = false;
 			// 
@@ -409,22 +414,38 @@ namespace Crypto {
 			this->lineShape2->Name = L"lineShape2";
 			this->lineShape2->X1 = 359;
 			this->lineShape2->X2 = 446;
-			this->lineShape2->Y1 = 326;
-			this->lineShape2->Y2 = 326;
+			this->lineShape2->Y1 = 339;
+			this->lineShape2->Y2 = 339;
 			// 
 			// lineShape1
 			// 
 			this->lineShape1->Name = L"lineShape1";
 			this->lineShape1->X1 = 538;
 			this->lineShape1->X2 = 625;
-			this->lineShape1->Y1 = 326;
-			this->lineShape1->Y2 = 326;
+			this->lineShape1->Y1 = 340;
+			this->lineShape1->Y2 = 340;
+			// 
+			// menuStrip1
+			// 
+			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {this->quitToolStripMenuItem});
+			this->menuStrip1->Location = System::Drawing::Point(0, 0);
+			this->menuStrip1->Name = L"menuStrip1";
+			this->menuStrip1->Size = System::Drawing::Size(840, 24);
+			this->menuStrip1->TabIndex = 13;
+			this->menuStrip1->Text = L"menuStrip1";
+			// 
+			// quitToolStripMenuItem
+			// 
+			this->quitToolStripMenuItem->Name = L"quitToolStripMenuItem";
+			this->quitToolStripMenuItem->Size = System::Drawing::Size(42, 20);
+			this->quitToolStripMenuItem->Text = L"Quit";
+			this->quitToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::quitToolStripMenuItem_Click);
 			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(7, 14);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(840, 554);
+			this->ClientSize = System::Drawing::Size(840, 568);
 			this->Controls->Add(this->button3);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->textBox4);
@@ -437,80 +458,104 @@ namespace Crypto {
 			this->Controls->Add(this->textBox1);
 			this->Controls->Add(this->button2);
 			this->Controls->Add(this->button1);
+			this->Controls->Add(this->menuStrip1);
 			this->Controls->Add(this->shapeContainer1);
 			this->Font = (gcnew System::Drawing::Font(L"Georgia", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
+			this->MainMenuStrip = this->menuStrip1;
 			this->Name = L"Form1";
 			this->Text = L"COMMAND CENTER";
-			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
 			this->groupBox1->ResumeLayout(false);
 			this->groupBox1->PerformLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox1))->EndInit();
+			this->menuStrip1->ResumeLayout(false);
+			this->menuStrip1->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
 
-
-	private: System::Void textBox1_TextChanged(System::Object^  sender, System::EventArgs^  e) 
-			 {
-
-			 }
-
-
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) 
 			 {
-
-				if(value==1)
+				if (value1 == 1)
 				{
-				 cipherdata = textBox1->Text;
-				 plainbytes = Encoding::ASCII->GetBytes(cipherdata);
-				 plainkey = Encoding::ASCII->GetBytes("0123456789abcdef");
-				 desObj->Key = plainkey;
-				 desObj->Mode = CipherMode::CBC;
-				 desObj->Padding = PaddingMode::Zeros;
+					/* Creation of an Hash value to the entered message that is about to be passed */
+					button2->Enabled = true;
+					int^ hashval = DisplayHashCode(textBox1->Text);
+					String^ hashstr = hashval->ToString();
+					/* Writing that SHA-256 value into a file */
+					StreamWriter^ outfile = gcnew StreamWriter("Hash.txt");
+					outfile->Write(hashstr); 
+					outfile->Close();
 
-				 MemoryStream^ ms = gcnew MemoryStream();
-				 CryptoStream^ cs = gcnew CryptoStream(ms, desObj->CreateEncryptor(), CryptoStreamMode::Write);
+					if(value==1)
+					{
+						/* Creation of Encrypted Message using AES Algortihm */
+						cipherdata = textBox1->Text;
+						plainbytes = Encoding::ASCII->GetBytes(cipherdata);
+						plainkey = Encoding::ASCII->GetBytes("0123456789abcdef");
+						desObj->Key = plainkey;
+						desObj->Mode = CipherMode::CBC;
+						desObj->Padding = PaddingMode::Zeros;
 
-				 cs->Write(plainbytes, 0, plainbytes->Length);
-				 cs->Close();
+						/* Creation of an memory stream to write in all the encrypted values */
+						MemoryStream^ ms = gcnew MemoryStream();
 
-				 cipherbytes = ms->ToArray();
-				 ms->Close();
-				 textBox2->Text = Encoding::ASCII->GetString(cipherbytes);
-				}
-				else if(value==2)
-				{
-					DESCryptoServiceProvider^ DesAlg = gcnew DESCryptoServiceProvider;
-					desdata = textBox1->Text;
-					
-					descipher = EncryptTextToMemory(desdata, DesAlg->Key, DesAlg->IV);
-					textBox2->Text = Encoding::ASCII->GetString(descipher);
+						/* Calling the inbuit funcitons from the AESCryptoServiceProvider Class */
+						CryptoStream^ cs = gcnew CryptoStream(ms, desObj->CreateEncryptor(), CryptoStreamMode::Write);
 
-					Final = DecryptTextFromMemory(descipher, DesAlg->Key, DesAlg->IV);
-					//MessageBox::Show("For now DES Algorithm is under construction");
-					/*DES ALGORITHM*/
-				}
-				else if(value==3)
-				{
-					cipherdata = textBox1->Text;
-					data = Encoding::ASCII->GetBytes(cipherdata);
-					RSACryptoServiceProvider^ rsa = gcnew RSACryptoServiceProvider();
+						cs->Write(plainbytes, 0, plainbytes->Length);
+						cs->Close();
+						cipherbytes = ms->ToArray();
+						ms->Close();
 
-					cdata = RSAEncrypt(data, rsa->ExportParameters(false), false);
-					rbytes = RSADecrypt(cdata, rsa->ExportParameters(true), false);
+						/* Writing the encrypted text onto an textbox */
+						textBox2->Text = Encoding::ASCII->GetString(cipherbytes);
+					}
+					else if(value==2)
+					{
+						/* Creation of Encrypted Message using DES Algortihm */
+						DESCryptoServiceProvider^ DesAlg = gcnew DESCryptoServiceProvider;
+						desdata = textBox1->Text;
 
-					textBox2->Text = Encoding::ASCII->GetString(cdata);
-					/*RSA Algorithm*/
+						/* Calling the inbuit funcitons from the DESCryptoServiceProvider Class */					
+						descipher = EncryptTextToMemory(desdata, DesAlg->Key, DesAlg->IV);
+
+						/* Writing the encrypted text onto an textbox */
+						textBox2->Text = Encoding::ASCII->GetString(descipher);
+
+						Final = DecryptTextFromMemory(descipher, DesAlg->Key, DesAlg->IV);
+					}
+					else if(value==3)
+					{
+						/* Creation of Encrypted Message using RSA Algortihm */
+						cipherdata = textBox1->Text;
+						data = Encoding::ASCII->GetBytes(cipherdata);
+						RSACryptoServiceProvider^ rsa = gcnew RSACryptoServiceProvider();
+
+						/* Calling the inbuit funcitons from the RSACryptoServiceProvider Class */
+						cdata = RSAEncrypt(data, rsa->ExportParameters(false), false);
+						rbytes = RSADecrypt(cdata, rsa->ExportParameters(true), false);
+
+						/* Writing the encrypted text onto an textbox */
+						textBox2->Text = Encoding::ASCII->GetString(cdata);
+					}
+					else
+						/* Condition to ensure that an algorithm is checked before encryption */
+						MessageBox::Show("Please Select an Algoritm First");
 				}
 				else
-					MessageBox::Show("Please Select an Algoritm First");
+				{
+					/* Condition to ensure that an digital signature is entred before encryption */
+					MessageBox::Show("Type in your Signature and Encrypt it..!!");
+				}
 			 }
 	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) 
 		 {
-			 StreamWriter^ outfile = gcnew StreamWriter("C:\\Users\\Administrator.MCS-337\\Desktop\\All\\Crypto\\Crypto\\Crypto\\Intermi.txt");
+			 /* Performs message sending operation and
+			 Writing the intermediate encrypted value onto a text file for future decryption*/
+			 StreamWriter^ outfile = gcnew StreamWriter("Intermi.txt");
 			 outfile->Write(textBox2->Text); 
 			 outfile->Close();
 
@@ -518,54 +563,79 @@ namespace Crypto {
 			 {
 				MessageBox::Show("Message Sent Sucessfully..!!!");
 				this->Hide();
-				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher);
+				/* Calling the second form Form2 from From1 by passing the arguments */
+				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher, sign);
 				f2->ShowDialog();
 			 }
 			 else if (value == 2)
 			 {
 				MessageBox::Show("Message Sent Sucessfully..!!!");
 				this->Hide();
-				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher);
+				/* Calling the second form Form2 from From1 by passing the arguments */
+				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher, sign);
 				f2->ShowDialog();
 			 }
 			 else
 			 {
 				MessageBox::Show("Message Sent Sucessfully..!!!");
 				this->Hide();
-				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher);
+				/* Calling the second form Form2 from From1 by passing the arguments */
+				Form2^ f2 = gcnew Form2(textBox2->Text, cipherbytes, rbytes, desObj, textBox1->Text, value, Final, signcipher, sign);
 				f2->ShowDialog();
 			 }
 		 }
-	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) {
-		 }
-		
+
 	private: System::Void radioButton1_CheckedChanged(System::Object^  sender, System::EventArgs^  e) 
 		 {
-		value=1;
+			 /* Setting value if AES algorithm is checked*/
+			 value=1;
 		 }
 	private: System::Void radioButton2_CheckedChanged(System::Object^  sender, System::EventArgs^  e) 
 		 {
-		value=2;
+			 /* Setting value if DES algorithm is checked*/
+			 value=2;
 		 }
 	private: System::Void radioButton3_CheckedChanged(System::Object^  sender, System::EventArgs^  e) 
 		 {
-		 value=3;
+			 /* Setting value if AES algorithm is checked*/
+			 value=3;
 		 }
 
-private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
-			 String^ sign = textBox3->Text;
-			 DESCryptoServiceProvider^ DesAlg = gcnew DESCryptoServiceProvider;
-			
-			 signcipher = EncryptTextToMemory(sign, DesAlg->Key, DesAlg->IV);
-			 textBox4->Text = Encoding::ASCII->GetString(signcipher);
+private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e)
+		 {
+			 /* Encrpyts the Digital Signature enterd by the user */
+			 value1 = 1;
+			 sign = textBox3->Text;
 
-			 StreamWriter^ outfile = gcnew StreamWriter("C:\\Users\\Administrator.MCS-337\\Desktop\\All\\Crypto\\Crypto\\Crypto\\Signature.txt");
-			 outfile->Write(textBox4->Text);
-			 outfile->Close();
+			 /* Using AES Algorithm */
+			 array<Byte> ^plainbytes2 = Encoding::ASCII->GetBytes(sign);
+			 array<Byte> ^plainkey2 = Encoding::ASCII->GetBytes("0123456789abcdef");
+			 desObj1->Key = plainkey2;
+			 desObj1->Mode = CipherMode::CBC;
+			 desObj1->Padding = PaddingMode::Zeros;
 
+			 /* Creation of an memory stream to write in all the encrypted values */
+			 MemoryStream^ ms = gcnew MemoryStream();
+			 CryptoStream^ cs = gcnew CryptoStream(ms, desObj1->CreateEncryptor(), CryptoStreamMode::Write);
+
+			 cs->Write(plainbytes2, 0, plainbytes2->Length);
+			 cs->Close();
+
+			 cipherbytes2 = ms->ToArray();
+			 ms->Close();
+			 /* Displaying it onto a text box */
+			 textBox4->Text = Encoding::ASCII->GetString(cipherbytes2);
+			 
 		 }
-private: System::Void menuStrip1_ItemClicked(System::Object^  sender, System::Windows::Forms::ToolStripItemClickedEventArgs^  e) {
-			 Application::Exit();
+
+private: System::Void quitToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e)
+		 {
+			 /* MENU STRIP to Quit from the application */
+			 if(MessageBox::Show("Do you want to exit?","My Application", MessageBoxButtons::YesNo,MessageBoxIcon::Question) == System::Windows::Forms::DialogResult::Yes)
+			 {
+				 Application::Exit();
+			 }
 		 }
+
 };
 }
